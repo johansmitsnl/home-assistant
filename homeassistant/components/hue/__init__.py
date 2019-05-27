@@ -21,6 +21,9 @@ DEFAULT_ALLOW_UNREACHABLE = False
 
 DATA_CONFIGS = "hue_configs"
 
+CONF_SCAN_INTERVAL = 'scan_interval'
+DEFAULT_SCAN_INTERVAL = 5.0
+
 PHUE_CONFIG_FILE = "phue.conf"
 
 CONF_ALLOW_HUE_GROUPS = "allow_hue_groups"
@@ -37,6 +40,8 @@ BRIDGE_CONFIG_SCHEMA = vol.Schema(
             CONF_ALLOW_HUE_GROUPS, default=DEFAULT_ALLOW_HUE_GROUPS
         ): cv.boolean,
         vol.Optional("filename"): str,
+        vol.Optional(CONF_SCAN_INTERVAL,
+                     default=DEFAULT_SCAN_INTERVAL): float,
     }
 )
 
@@ -113,11 +118,14 @@ async def async_setup_entry(
     if config is None:
         allow_unreachable = DEFAULT_ALLOW_UNREACHABLE
         allow_groups = DEFAULT_ALLOW_HUE_GROUPS
+        scan_interval = DEFAULT_SCAN_INTERVAL
     else:
         allow_unreachable = config[CONF_ALLOW_UNREACHABLE]
         allow_groups = config[CONF_ALLOW_HUE_GROUPS]
+        scan_interval = config[CONF_SCAN_INTERVAL]
 
-    bridge = HueBridge(hass, entry, allow_unreachable, allow_groups)
+    bridge = HueBridge(hass, entry, allow_unreachable, allow_groups,
+                       scan_interval)
 
     if not await bridge.async_setup():
         return False
